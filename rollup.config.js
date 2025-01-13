@@ -8,7 +8,7 @@ export default [
     output: {
       file: "public/bundle.js",
       format: "iife",
-      name: "D3MapLib",
+      name: "KMapVisualizer",
       globals: {
         d3: "d3",
         "topojson-client": "topojson",

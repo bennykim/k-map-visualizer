@@ -1,9 +1,9 @@
-import { KMapVisualizer } from "./lib/KMapVisualizer";
+import { MapInitializer } from "./lib/MapInitializer";
 
-const d3MapLib = new KMapVisualizer();
+const mapRenderer = new MapInitializer();
 
 if (typeof window !== "undefined") {
-  window.D3MapLib = d3MapLib;
+  window.MapRenderer = mapRenderer;
 }
 
-export default d3MapLib;
+export default mapRenderer;
