@@ -7,7 +7,20 @@ export const DEFAULT_OPTIONS: MapOptions = {
   scale: 28000,
 };
 
-export const DEFAULT_RADIUS = 3;
+export const CONFIG = {
+  ZOOM: {
+    MIN_SCALE: 0.3,
+    MAX_SCALE: 10,
+    TRANSITION_DURATION: 750,
+    MAX_REGION_SCALE: 8,
+  },
+  POINT: {
+    DEFAULT_RADIUS: 3,
+    HOVER_SCALE: 2,
+    TRANSITION_DURATION: 200,
+    TOOLTIP_OFFSET: { X: 15, Y: 15 },
+  },
+} as const;
 
 export const COLORS = {
   // Base colors
@@ -25,3 +38,5 @@ export const COLORS = {
   POINT_DEFAULT: "#5EEAD4",
   TEXT: "#FFFFFF",
 } as const;
+
+export const DEFAULT_RADIUS = 3;
