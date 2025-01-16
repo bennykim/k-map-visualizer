@@ -5,7 +5,7 @@ async function initMap() {
     const data = await response.json();
     console.log("TopoJSON data structure:", data);
 
-    const map = await MapRenderer.initializeMap("map-container", {
+    const map = await GeoKoreaRenderer.initializeMap("map-container", {
       width: window.innerWidth,
       height: window.innerHeight,
       center: [128.15, 35.75],

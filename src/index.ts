@@ -1,6 +1,6 @@
 export { DEFAULT_OPTIONS } from "./lib/constants";
-export { KMap } from "./lib/KMap";
-export { KMapInitializer } from "./lib/KMapInitializer";
+export { GeoKorea } from "./lib/GeoKorea";
+export { GeoKoreaInitializer } from "./lib/GeoKoreaInitializer";
 export type { MapOptions } from "./lib/types";
 
 export { default } from "./browser";

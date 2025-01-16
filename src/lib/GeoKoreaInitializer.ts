@@ -1,16 +1,16 @@
 import type { Topology } from "topojson-specification";
 
-import { KMap } from "./KMap";
+import { GeoKorea } from "./GeoKorea";
 import { DEFAULT_OPTIONS } from "./constants";
 import { MapOptions } from "./types";
 
 import defaultMapData from "./data/K-City_2023.json";
 
-export class KMapInitializer {
+export class GeoKoreaInitializer {
   async initializeMap(
     container: HTMLElement | string,
     options: Partial<MapOptions & { topoJsonPath?: string }> = {}
-  ): Promise<KMap> {
+  ): Promise<GeoKorea> {
     const containerElement =
       typeof container === "string"
         ? this.validateContainer(container)
@@ -26,7 +26,7 @@ export class KMapInitializer {
       onRegionClick: options.onRegionClick,
     };
 
-    const map = new KMap(containerElement, mergedOptions);
+    const map = new GeoKorea(containerElement, mergedOptions);
 
     try {
       const topoData = options.topoJsonPath

@@ -1,9 +1,9 @@
-import { KMapInitializer } from "./lib/KMapInitializer";
+import { GeoKoreaInitializer } from "./lib/GeoKoreaInitializer";
 
-const mapRenderer = new KMapInitializer();
+const geoKoreaRenderer = new GeoKoreaInitializer();
 
 if (typeof window !== "undefined") {
-  window.MapRenderer = mapRenderer;
+  window.GeoKoreaRenderer = geoKoreaRenderer;
 }
 
-export default mapRenderer;
+export default geoKoreaRenderer;

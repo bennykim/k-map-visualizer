@@ -1,4 +1,4 @@
-# K-Map
+# Geo Korea
 
 Interactive map visualization library for Korea using TopoJSON data, built with D3.js.
 
@@ -14,11 +14,11 @@ Interactive map visualization library for Korea using TopoJSON data, built with 
 ## Installation
 
 ```bash
-npm install k-map
+npm install geo-korea
 # or
-yarn add k-map
+yarn add geo-korea
 # or
-pnpm add k-map
+pnpm add geo-korea
 ```
 
 ## Usage
@@ -27,16 +27,16 @@ pnpm add k-map
 
 ```typescript
 import React, { useEffect, useRef } from "react";
-import { KMapInitializer } from "k-map";
+import { GeoKoreaInitializer } from "geo-korea";
 
 const Map: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (mapContainerRef.current) {
-      const kMapRenderer = new KMapInitializer();
+      const GeoKoreaRenderer = new GeoKoreaInitializer();
 
-      kMapRenderer.initializeMap(mapContainerRef.current, {
+      GeoKoreaRenderer.initializeMap(mapContainerRef.current, {
         width: window.innerWidth,
         height: window.innerHeight,
         center: [128.35, 37.68],
@@ -63,9 +63,9 @@ const Map: React.FC = () => {
 ### With Vanilla JavaScript
 
 ```javascript
-const kMapRenderer = new KMapInitializer();
+const GeoKoreaRenderer = new GeoKoreaInitializer();
 
-kMapRenderer.initializeMap("map-container", {
+GeoKoreaRenderer.initializeMap("map-container", {
   width: window.innerWidth,
   height: window.innerHeight,
   scale: 5,

@@ -9,7 +9,7 @@ import type { GeoFeature, MapOptions, Point } from "./types";
 type TooltipContent = string | HTMLElement;
 type D3Selection<T extends Element> = d3.Selection<T, unknown, null, undefined>;
 
-export class KMap {
+export class GeoKorea {
   private readonly svg: D3Selection<SVGSVGElement>;
   private readonly g: D3Selection<SVGGElement>;
   private readonly labelGroup: D3Selection<SVGGElement>;

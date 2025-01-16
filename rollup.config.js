@@ -9,7 +9,7 @@ export default [
     output: {
       file: "public/bundle.js",
       format: "iife",
-      name: "KMap",
+      name: "GeoKorea",
       globals: {
         d3: "d3",
         "topojson-client": "topojson",
