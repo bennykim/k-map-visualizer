@@ -2,12 +2,28 @@
   "name": "k-map",
   "version": "1.0.0",
   "description": "A flexible library for visualizing data on South Korea’s map",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/types/index.d.ts",
+  "author": "mniii",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bennykim/k-map"
+  },
+  "homepage": "https://github.com/bennykim/k-map#readme",
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/esm/types/index.d.ts"
+    }
+  },
   "scripts": {
     "clean": "rimraf dist public/bundle.js public/bundle.js.map",
     "dev": "rollup -c -w",
@@ -40,6 +56,5 @@
     "korea",
     "visualization"
   ],
-  "author": "MNIII",
   "license": "MIT"
 }
