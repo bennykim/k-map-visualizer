@@ -1,4 +1,5 @@
 import type { GeoGeometryObjects } from "d3-geo";
+
 import type { MapInitializer } from "./MapInitializer";
 
 declare global {
@@ -24,8 +25,16 @@ export type MapOptions = {
   height: number;
   center?: [number, number];
   scale?: number;
-  onRegionClick?: (name: string) => void;
   points?: Point[];
+  colors?: {
+    region?: string;
+    regionHover?: string;
+    point?: string;
+    pointHover?: string;
+    selected?: string;
+    border?: string;
+  };
+  onRegionClick?: (name: string) => void;
 };
 
 export type GeoFeature = {

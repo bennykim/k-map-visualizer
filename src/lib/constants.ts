@@ -4,21 +4,38 @@ export const DEFAULT_OPTIONS: MapOptions = {
   width: 800,
   height: 600,
   center: [128.35, 37.68],
-  scale: 28000,
+  scale: 5,
+  points: [],
+  colors: {
+    region: "#2A2D35",
+    regionHover: "#3F4046",
+    point: "#5EEAD4",
+    pointHover: "#6366F1",
+    selected: "#6366F1",
+    border: "#4A4B50",
+  },
 };
 
 export const CONFIG = {
   ZOOM: {
-    MIN_SCALE: 0.3,
-    MAX_SCALE: 10,
+    MIN_SCALE: 0.5,
+    MAX_SCALE: 8,
+    MIN_ACTUAL_SCALE: 2000,
+    MAX_ACTUAL_SCALE: 20000,
+    MAX_REGION_SCALE: 5,
     TRANSITION_DURATION: 750,
-    MAX_REGION_SCALE: 8,
   },
   POINT: {
     DEFAULT_RADIUS: 3,
     HOVER_SCALE: 2,
     TRANSITION_DURATION: 200,
-    TOOLTIP_OFFSET: { X: 15, Y: 15 },
+    TOOLTIP_OFFSET: { X: 10, Y: 10 },
+  },
+  TOOLTIP: {
+    COLORS: {
+      BACKGROUND: "#1A1B1E",
+      TEXT: "#FFFFFF",
+    },
   },
 } as const;
 

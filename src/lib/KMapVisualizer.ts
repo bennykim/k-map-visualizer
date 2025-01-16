@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import type { GeoPath, GeoProjection } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
+
 import { COLORS, CONFIG, DEFAULT_OPTIONS, DEFAULT_RADIUS } from "./constants";
 import type { GeoFeature, MapOptions, Point } from "./types";
 
@@ -17,7 +18,6 @@ export class KMapVisualizer {
   private readonly projection: GeoProjection;
   private readonly path: GeoPath;
   private readonly zoom: d3.ZoomBehavior<SVGSVGElement, unknown>;
-
   private readonly elements = new Map<string, D3Selection<SVGElement>>();
 
   constructor(
@@ -70,6 +70,20 @@ export class KMapVisualizer {
     };
   }
 
+  private normalizeScale(scale: number): number {
+    const normalizedScale = Math.min(
+      Math.max(scale, CONFIG.ZOOM.MIN_SCALE),
+      CONFIG.ZOOM.MAX_SCALE
+    );
+
+    return (
+      CONFIG.ZOOM.MIN_ACTUAL_SCALE +
+      ((normalizedScale - CONFIG.ZOOM.MIN_SCALE) /
+        (CONFIG.ZOOM.MAX_SCALE - CONFIG.ZOOM.MIN_SCALE)) *
+        (CONFIG.ZOOM.MAX_ACTUAL_SCALE - CONFIG.ZOOM.MIN_ACTUAL_SCALE)
+    );
+  }
+
   private initializeProjection() {
     const {
       width,
@@ -78,10 +92,12 @@ export class KMapVisualizer {
       scale = DEFAULT_OPTIONS.scale!,
     } = this.options;
 
+    const normalizedScale = this.normalizeScale(scale);
+
     const projection = d3
       .geoMercator()
       .center(center)
-      .scale(scale)
+      .scale(normalizedScale)
       .translate([width / 2, height / 2]);
 
     return {
@@ -113,8 +129,8 @@ export class KMapVisualizer {
     const styles = {
       position: "absolute",
       visibility: "hidden",
-      "background-color": COLORS.DARK_BG,
-      color: COLORS.TEXT,
+      "background-color": CONFIG.TOOLTIP.COLORS.BACKGROUND,
+      color: CONFIG.TOOLTIP.COLORS.TEXT,
       padding: "12px",
       "border-radius": "8px",
       "font-size": "14px",
@@ -139,20 +155,15 @@ export class KMapVisualizer {
   }
 
   private handlePoint = {
-    enter: (point: Point, baseRadius: number) => {
+    enter: (point: Point) => {
       return (event: MouseEvent) => {
-        const currentZoom = this.getCurrentZoom();
+        const colors = this.getColors();
         const circle = d3.select(event.target as SVGCircleElement);
 
         circle
           .transition()
           .duration(CONFIG.POINT.TRANSITION_DURATION)
-          .attr(
-            "r",
-            this.calculatePointRadius(baseRadius, currentZoom) *
-              CONFIG.POINT.HOVER_SCALE
-          )
-          .attr("fill", "red");
+          .attr("fill", colors.pointHover);
 
         this.updateTooltip(event, point);
       };
@@ -165,25 +176,21 @@ export class KMapVisualizer {
         .style("top", `${pageY + CONFIG.POINT.TOOLTIP_OFFSET.Y}px`);
     },
 
-    leave: (baseRadius: number) => {
+    leave: () => {
       return (event: MouseEvent) => {
-        const currentZoom = this.getCurrentZoom();
+        const colors = this.getColors();
         const circle = d3.select(event.target as SVGCircleElement);
+        const point = circle.datum() as Point;
 
         circle
           .transition()
           .duration(CONFIG.POINT.TRANSITION_DURATION)
-          .attr("r", this.calculatePointRadius(baseRadius, currentZoom))
-          .attr("fill", COLORS.POINT_DEFAULT);
+          .attr("fill", colors.point);
 
         this.tooltipDiv.style("visibility", "hidden");
       };
     },
   };
-
-  private getCurrentZoom(): number {
-    return d3.zoomTransform(this.svg.node()!).k;
-  }
 
   private updateTooltip(event: MouseEvent, point: Point): void {
     const content = this.options.tooltipRenderer?.(point) ?? "";
@@ -199,34 +206,25 @@ export class KMapVisualizer {
     }
   }
 
-  private calculatePointRadius(
-    baseRadius: number,
-    zoomLevel: number,
-    isHovered = false
-  ): number {
-    const adjustedRadius = (baseRadius / 2) * zoomLevel;
-    return isHovered ? adjustedRadius * 1.5 : adjustedRadius;
-  }
-
   private renderPoints(points: Point[]): void {
+    const colors = this.getColors();
     this.pointGroup.selectAll("circle").remove();
 
     points.forEach((point) => {
       const [latitude, longitude] = point.coordinates;
       const [x, y] = this.projection([longitude, latitude])!;
-      const baseRadius = point.radius ?? DEFAULT_RADIUS;
+      const radius = point.radius ?? DEFAULT_RADIUS;
 
       this.pointGroup
         .append("circle")
         .attr("cx", x)
         .attr("cy", y)
-        .attr("r", baseRadius)
-        .attr("data-original-radius", baseRadius)
-        .attr("fill", point.color ?? COLORS.POINT_DEFAULT)
+        .attr("r", radius)
+        .attr("fill", point.color ?? colors.point)
         .style("cursor", "pointer")
-        .on("mouseenter", this.handlePoint.enter(point, baseRadius))
+        .on("mouseenter", this.handlePoint.enter(point))
         .on("mousemove", this.handlePoint.move)
-        .on("mouseleave", this.handlePoint.leave(baseRadius));
+        .on("mouseleave", this.handlePoint.leave());
     });
   }
 
@@ -242,53 +240,60 @@ export class KMapVisualizer {
     leave: (event: MouseEvent & { currentTarget: SVGPathElement }) => void;
   } = {
     click: (event: MouseEvent, d: GeoFeature) => {
+      const colors = this.getColors();
       event.stopPropagation();
       this.options.onRegionClick?.(d.properties.name);
 
       const paths = this.g.selectAll<SVGPathElement, GeoFeature>("path");
-      paths.style("fill", null);
+      paths.style("fill", colors.region);
 
       d3.select(event.currentTarget as SVGPathElement).style(
         "fill",
-        COLORS.SELECTED_REGION
+        colors.selected
       );
 
       this.zoomToRegion(d);
     },
 
     enter: (event: MouseEvent, d: GeoFeature) => {
+      const colors = this.getColors();
       const target = d3.select(event.currentTarget as Element);
-      if (target.style("fill") !== COLORS.SELECTED_REGION) {
-        target.style("fill", COLORS.HOVER_REGION);
+
+      if (target.style("fill") !== colors.selected) {
+        target.style("fill", colors.regionHover);
       }
-      this.showLabel(d);
+      // Uncomment this line to show region names on hover
+      // this.showLabel(d);
     },
 
     leave: (event: MouseEvent) => {
+      const colors = this.getColors();
       const target = d3.select(event.currentTarget as Element);
-      if (target.style("fill") !== COLORS.SELECTED_REGION) {
-        target.style("fill", COLORS.DEFAULT_REGION);
+
+      if (target.style("fill") !== colors.selected) {
+        target.style("fill", colors.region);
       }
+
       this.hideLabel();
     },
   };
 
-  private showLabel(d: GeoFeature): void {
-    this.labelGroup.selectAll("text").remove();
-    const [x, y] = this.path.centroid(d);
+  // private showLabel(d: GeoFeature): void {
+  //   this.labelGroup.selectAll("text").remove();
+  //   const [x, y] = this.path.centroid(d);
 
-    this.labelGroup
-      .append("text")
-      .attr("x", x)
-      .attr("y", y)
-      .attr("text-anchor", "middle")
-      .attr("alignment-baseline", "middle")
-      .attr("fill", COLORS.TEXT)
-      .attr("font-weight", "medium")
-      .attr("font-size", "12px")
-      .attr("pointer-events", "none")
-      .text(d.properties.name);
-  }
+  //   this.labelGroup
+  //     .append("text")
+  //     .attr("x", x)
+  //     .attr("y", y)
+  //     .attr("text-anchor", "middle")
+  //     .attr("alignment-baseline", "middle")
+  //     .attr("fill", COLORS.TEXT)
+  //     .attr("font-weight", "medium")
+  //     .attr("font-size", "12px")
+  //     .attr("pointer-events", "none")
+  //     .text(d.properties.name);
+  // }
 
   private hideLabel(): void {
     this.labelGroup.selectAll("text").remove();
@@ -305,15 +310,6 @@ export class KMapVisualizer {
     });
 
     this.g.attr("stroke-width", `${1 / transform.k}`);
-
-    this.pointGroup.selectAll("circle").attr("r", (_, i, nodes) => {
-      const circle = d3.select(nodes[i]);
-      const baseRadius = parseFloat(
-        circle.attr("data-original-radius") ?? DEFAULT_RADIUS.toString()
-      );
-      const isHovered = circle.classed("hovered");
-      return this.calculatePointRadius(baseRadius, transform.k, isHovered);
-    });
   };
 
   public updatePoints(points: Point[]): void {
@@ -351,10 +347,23 @@ export class KMapVisualizer {
       .call(this.zoom.transform, d3.zoomIdentity);
   }
 
+  private getColors() {
+    return {
+      region: this.options.colors?.region ?? COLORS.DEFAULT_REGION,
+      regionHover: this.options.colors?.regionHover ?? COLORS.HOVER_REGION,
+      point: this.options.colors?.point ?? COLORS.POINT_DEFAULT,
+      pointHover: this.options.colors?.pointHover ?? COLORS.INDIGO_500,
+      selected: this.options.colors?.selected ?? COLORS.SELECTED_REGION,
+      border: this.options.colors?.border ?? COLORS.BORDER,
+    };
+  }
+
   private renderRegions(features: GeoFeature[]): void {
+    const colors = this.options.colors ?? DEFAULT_OPTIONS.colors;
+
     this.g
       .append("g")
-      .attr("fill", COLORS.DEFAULT_REGION)
+      .attr("fill", colors?.region ?? COLORS.DEFAULT_REGION)
       .attr("cursor", "pointer")
       .selectAll<SVGPathElement, GeoFeature>("path")
       .data(features)
@@ -366,10 +375,12 @@ export class KMapVisualizer {
   }
 
   private renderBorders(topoData: Topology, objectName: string): void {
+    const colors = this.getColors();
+
     this.g
       .append("path")
       .attr("fill", "none")
-      .attr("stroke", COLORS.BORDER)
+      .attr("stroke", colors.border)
       .attr("stroke-linejoin", "round")
       .attr(
         "d",
