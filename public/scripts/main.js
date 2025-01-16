@@ -5,29 +5,26 @@ async function initMap() {
     const data = await response.json();
     console.log("TopoJSON data structure:", data);
 
-    const map = await MapRenderer.initializeMap(
-      "map-container",
-      "./K-City_2023.json",
-      {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        center: [128.15, 35.75],
-        scale: 2,
-        points: cityHalls,
-        colors: {
-          region: "#e5e7eb",
-          regionHover: "#d1d5db",
-          point: "#3b82f6",
-          pointHover: "#ef4444",
-          selected: "#93c5fd",
-          border: "#6b7280",
-        },
-        onRegionClick: (name) => {
-          document.getElementById("region-name").textContent =
-            name || "지역을 선택하세요";
-        },
-        tooltipRenderer: (point) => {
-          return `
+    const map = await MapRenderer.initializeMap("map-container", {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      center: [128.15, 35.75],
+      scale: 2,
+      points: cityHalls,
+      colors: {
+        region: "#e5e7eb",
+        regionHover: "#d1d5db",
+        point: "#3b82f6",
+        pointHover: "#ef4444",
+        selected: "#93c5fd",
+        border: "#6b7280",
+      },
+      onRegionClick: (name) => {
+        document.getElementById("region-name").textContent =
+          name || "지역을 선택하세요";
+      },
+      tooltipRenderer: (point) => {
+        return `
             <div style="margin-bottom: 8px;">
               <strong style="color: #5EEAD4">${point.name}</strong>
             </div>
@@ -41,9 +38,8 @@ async function initMap() {
               <span style="color: #D4D4D8">타입:</span> ${point.type}
             </div>
           `;
-        },
-      }
-    );
+      },
+    });
     window.map = map; // For debugging
   } catch (error) {
     console.error("Failed to initialize map:", error);

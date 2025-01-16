@@ -1,10 +1,10 @@
 import type { GeoGeometryObjects } from "d3-geo";
 
-import type { MapInitializer } from "./MapInitializer";
+import type { KMapInitializer } from "./KMapInitializer";
 
 declare global {
   interface Window {
-    MapRenderer: MapInitializer;
+    MapRenderer: KMapInitializer;
   }
 }
 

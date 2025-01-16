@@ -1,4 +1,5 @@
 import commonjs from "@rollup/plugin-commonjs";
+import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 
@@ -8,7 +9,7 @@ export default [
     output: {
       file: "public/bundle.js",
       format: "iife",
-      name: "KMapVisualizer",
+      name: "KMap",
       globals: {
         d3: "d3",
         "topojson-client": "topojson",
@@ -16,7 +17,7 @@ export default [
       sourcemap: true,
       extend: true,
     },
-    plugins: [resolve({ browser: true }), commonjs(), typescript()],
+    plugins: [resolve({ browser: true }), commonjs(), typescript(), json()],
     external: ["d3", "topojson-client"],
   },
   {
@@ -26,7 +27,7 @@ export default [
       format: "cjs",
       sourcemap: true,
     },
-    plugins: [resolve(), commonjs(), typescript()],
+    plugins: [resolve(), commonjs(), typescript(), json()],
     external: ["d3", "topojson-client"],
   },
   {
@@ -43,6 +44,8 @@ export default [
         declaration: true,
         declarationDir: "dist/esm",
       }),
+      ,
+      json(),
     ],
     external: ["d3", "topojson-client"],
   },

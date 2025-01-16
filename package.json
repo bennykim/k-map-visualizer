@@ -1,5 +1,5 @@
 {
-  "name": "k-map-visualizer",
+  "name": "k-map",
   "version": "1.0.0",
   "description": "A flexible library for visualizing data on South Korea’s map",
   "main": "dist/cjs/index.js",
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/d3": "^7.4.3",

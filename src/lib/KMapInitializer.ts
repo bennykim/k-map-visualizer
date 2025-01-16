@@ -1,28 +1,38 @@
 import type { Topology } from "topojson-specification";
 
-import { KMapVisualizer } from "./KMapVisualizer";
+import { KMap } from "./KMap";
 import { DEFAULT_OPTIONS } from "./constants";
 import { MapOptions } from "./types";
 
-export class MapInitializer {
+import defaultMapData from "./data/K-City_2023.json";
+
+export class KMapInitializer {
   async initializeMap(
-    containerId: string,
-    topoJsonPath: string,
-    options: Partial<MapOptions> = {}
-  ): Promise<KMapVisualizer> {
-    const container = this.validateContainer(containerId);
+    container: HTMLElement | string,
+    options: Partial<MapOptions & { topoJsonPath?: string }> = {}
+  ): Promise<KMap> {
+    const containerElement =
+      typeof container === "string"
+        ? this.validateContainer(container)
+        : container;
+
+    if (!containerElement) {
+      throw new Error("Container element is required");
+    }
 
     const mergedOptions = {
       ...DEFAULT_OPTIONS,
       ...options,
-
       onRegionClick: options.onRegionClick,
     };
 
-    const map = new KMapVisualizer(container, mergedOptions);
+    const map = new KMap(containerElement, mergedOptions);
 
     try {
-      const topoData = await this.loadTopoJSON(topoJsonPath);
+      const topoData = options.topoJsonPath
+        ? await this.loadTopoJSON(options.topoJsonPath)
+        : (defaultMapData as unknown as Topology);
+
       map.setTopoData(topoData, this.getFirstObjectKey(topoData));
       return map;
     } catch (error) {

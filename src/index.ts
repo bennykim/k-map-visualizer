@@ -1,6 +1,6 @@
 export { DEFAULT_OPTIONS } from "./lib/constants";
-export { KMapVisualizer } from "./lib/KMapVisualizer";
-export { MapInitializer } from "./lib/MapInitializer";
+export { KMap } from "./lib/KMap";
+export { KMapInitializer } from "./lib/KMapInitializer";
 export type { MapOptions } from "./lib/types";
 
 export { default } from "./browser";

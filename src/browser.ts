@@ -1,6 +1,6 @@
-import { MapInitializer } from "./lib/MapInitializer";
+import { KMapInitializer } from "./lib/KMapInitializer";
 
-const mapRenderer = new MapInitializer();
+const mapRenderer = new KMapInitializer();
 
 if (typeof window !== "undefined") {
   window.MapRenderer = mapRenderer;
