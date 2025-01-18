@@ -9,13 +9,11 @@ declare global {
 }
 
 export type Point = {
+  type: string;
   name: string;
   region: string;
   location: string;
   coordinates: number[];
-  industries: string[];
-  companies: number;
-  majorCompanies: string[];
   radius?: number;
   color?: string;
 };
