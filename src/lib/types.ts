@@ -1,5 +1,6 @@
 import type { GeoGeometryObjects } from "d3-geo";
 
+import type { GeoKorea } from "./GeoKorea";
 import type { GeoKoreaInitializer } from "./GeoKoreaInitializer";
 
 declare global {
@@ -13,7 +14,7 @@ export type Point = {
   name: string;
   region: string;
   location: string;
-  coordinates: number[];
+  coordinates: [number, number];
   radius?: number;
   color?: string;
 };
@@ -24,15 +25,18 @@ export type MapOptions = {
   center?: [number, number];
   scale?: number;
   points?: Point[];
-  colors?: {
-    region?: string;
-    regionHover?: string;
-    point?: string;
-    pointHover?: string;
-    selected?: string;
-    border?: string;
-  };
+  colors?: ColorOptions;
   onRegionClick?: (name: string) => void;
+  tooltipRenderer?: (point: Point) => string;
+};
+
+export type ColorOptions = {
+  region?: string;
+  regionHover?: string;
+  point?: string;
+  pointHover?: string;
+  selected?: string;
+  border?: string;
 };
 
 export type GeoFeature = {
@@ -42,4 +46,11 @@ export type GeoFeature = {
     [key: string]: any;
   };
   geometry: GeoGeometryObjects;
+};
+
+export type GeoKoreaInstance = {
+  map: GeoKorea;
+  destroy: () => void;
+  updatePoints: (points: Point[]) => void;
+  setTopoData: (topoData: any, objectName: string) => void;
 };
