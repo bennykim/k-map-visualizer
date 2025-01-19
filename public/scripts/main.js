@@ -8,10 +8,6 @@ async function initMap() {
     const points = window.cityHalls;
 
     const map = await GeoKoreaRenderer.createMap("map-container", {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      center: [128.15, 35.75],
-      scale: 2,
       points,
       colors: {
         region: "#e5e7eb",
