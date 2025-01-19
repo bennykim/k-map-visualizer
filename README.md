@@ -37,7 +37,7 @@ const Map: React.FC = () => {
     if (mapContainerRef.current) {
       const renderer = new GeoKoreaInitializer();
 
-      renderer.initializeMap(mapContainerRef.current, {
+      const geoKorea = renderer.createMap(mapContainerRef.current, {
         width: 800,
         height: 600,
         points: [
@@ -45,6 +45,7 @@ const Map: React.FC = () => {
             type: "city",
             name: "Seoul",
             region: "서울",
+            location: "Capital City",
             coordinates: [37.5665, 126.978],
             radius: 5,
             color: "#5EEAD4",
@@ -52,6 +53,10 @@ const Map: React.FC = () => {
         ],
         onRegionClick: (name) => console.log(`Clicked region: ${name}`),
       });
+
+      return () => {
+        geoKorea.destroy();
+      };
     }
   }, []);
 
@@ -65,7 +70,7 @@ const Map: React.FC = () => {
 const container = document.getElementById("map-container");
 const renderer = new GeoKoreaInitializer();
 
-renderer.initializeMap(container, {
+const geoKorea = renderer.createMap(container, {
   width: 800,
   height: 600,
   scale: 5,
@@ -94,6 +99,7 @@ type MapOptions = {
   points?: Point[]; // Array of point markers
   colors?: ColorOptions; // Custom color theme
   onRegionClick?: (name: string) => void; // Region click handler
+  tooltipRenderer?: (point: Point) => string; // Custom tooltip renderer
 };
 ```
 
@@ -105,7 +111,7 @@ type Point = {
   name: string; // Point name
   region: string; // Region name
   location: string; // Location description
-  coordinates: number[]; // [latitude, longitude]
+  coordinates: [number, number]; // [latitude, longitude]
   radius?: number; // Point size (default: 3)
   color?: string; // Custom point color
 };
@@ -150,7 +156,7 @@ const defaults = {
 You can provide your own TopoJSON data file:
 
 ```typescript
-renderer.initializeMap(container, {
+const geoKorea = renderer.createMap(container, {
   topoJsonPath: "/path/to/custom-map-data.json",
 });
 ```
@@ -158,7 +164,7 @@ renderer.initializeMap(container, {
 ### Custom Tooltip Renderer
 
 ```typescript
-renderer.initializeMap(container, {
+const geoKorea = renderer.createMap(container, {
   tooltipRenderer: (point) => {
     return `
       <div>
@@ -168,6 +174,19 @@ renderer.initializeMap(container, {
     `;
   },
 });
+```
+
+### Instance Methods
+
+The `createMap` method returns a GeoKoreaInstance with the following methods:
+
+```typescript
+type GeoKoreaInstance = {
+  map: GeoKorea; // Access to the underlying map instance
+  destroy: () => void; // Clean up resources
+  updatePoints: (points: Point[]) => void; // Update point markers
+  setTopoData: (topoData: any, objectName: string) => void; // Update map data
+};
 ```
 
 ## License
