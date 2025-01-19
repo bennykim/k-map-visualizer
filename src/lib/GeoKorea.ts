@@ -52,7 +52,8 @@ export class GeoKorea {
   }
 
   private initializeSvg(container: HTMLElement): D3Selection<SVGSVGElement> {
-    const { width, height } = this.options;
+    const { width, height } = container.getBoundingClientRect();
+
     return d3
       .select(container)
       .append("svg")
@@ -70,40 +71,41 @@ export class GeoKorea {
     };
   }
 
-  private normalizeScale(scale: number): number {
-    const normalizedScale = Math.min(
-      Math.max(scale, CONFIG.ZOOM.MIN_SCALE),
-      CONFIG.ZOOM.MAX_SCALE
-    );
-
-    return (
-      CONFIG.ZOOM.MIN_ACTUAL_SCALE +
-      ((normalizedScale - CONFIG.ZOOM.MIN_SCALE) /
-        (CONFIG.ZOOM.MAX_SCALE - CONFIG.ZOOM.MIN_SCALE)) *
-        (CONFIG.ZOOM.MAX_ACTUAL_SCALE - CONFIG.ZOOM.MIN_ACTUAL_SCALE)
-    );
-  }
-
   private initializeProjection() {
-    const {
-      width,
-      height,
-      center = DEFAULT_OPTIONS.center!,
-      scale = DEFAULT_OPTIONS.scale!,
-    } = this.options;
-
-    const normalizedScale = this.normalizeScale(scale);
-
-    const projection = d3
-      .geoMercator()
-      .center(center)
-      .scale(normalizedScale)
-      .translate([width / 2, height / 2]);
+    const projection = d3.geoMercator().scale(1).translate([0, 0]);
 
     return {
       projection,
       path: d3.geoPath(projection),
     };
+  }
+
+  private fitProjection(topoData: Topology, objectName: string): void {
+    const width = this.svg.node()?.clientWidth ?? this.options.width;
+    const height = this.svg.node()?.clientHeight ?? this.options.height;
+
+    const geojson = feature(
+      topoData,
+      topoData.objects[objectName] as GeometryCollection<
+        GeoFeature["properties"]
+      >
+    );
+
+    const bounds = this.path.bounds(geojson);
+    const [[x0, y0], [x1, y1]] = bounds;
+
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    const x = (x0 + x1) / 2;
+    const y = (y0 + y1) / 2;
+
+    const scale = Math.min(width / dx, height / dy) * 0.9;
+
+    this.projection
+      .scale(scale)
+      .translate([width / 2 - scale * x, height / 2 - scale * y]);
+
+    this.path.projection(this.projection);
   }
 
   private initializeZoom() {
@@ -317,6 +319,8 @@ export class GeoKorea {
   }
 
   public setTopoData(topoData: Topology, objectName: string): void {
+    this.fitProjection(topoData, objectName);
+
     const geojson = feature(
       topoData,
       topoData.objects[objectName] as GeometryCollection<
@@ -325,6 +329,7 @@ export class GeoKorea {
     ) as { type: "FeatureCollection"; features: GeoFeature[] };
 
     this.g.selectAll("*").remove();
+
     this.renderRegions(geojson.features);
     this.renderBorders(topoData, objectName);
     this.renderInitialPoints();

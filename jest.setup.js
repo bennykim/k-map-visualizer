@@ -18,9 +18,16 @@ projectionMock.center = jest.fn().mockReturnThis();
 projectionMock.scale = jest.fn().mockReturnThis();
 projectionMock.translate = jest.fn().mockReturnThis();
 
+const pathMock = jest.fn();
+pathMock.bounds = jest.fn().mockReturnValue([
+  [0, 0],
+  [100, 100],
+]);
+pathMock.projection = jest.fn().mockReturnThis();
+
 jest.mock("d3", () => ({
   select: jest.fn(() => mockSelection),
-  geoPath: jest.fn(() => jest.fn()),
+  geoPath: jest.fn(() => pathMock),
   geoMercator: jest.fn(() => projectionMock),
   zoom: jest.fn(() => ({
     scaleExtent: jest.fn().mockReturnThis(),

@@ -25,20 +25,62 @@ describe("GeoKorea", () => {
     objects: {
       testRegion: {
         type: "GeometryCollection",
-        geometries: [],
+        geometries: [
+          {
+            type: "Polygon",
+            properties: { name: "Test Region" },
+            arcs: [[0]],
+          },
+        ],
       },
     },
-    arcs: [],
+    arcs: [
+      [
+        [0, 0],
+        [100, 0],
+        [0, 100],
+        [0, 0],
+      ],
+    ],
+    transform: {
+      scale: [1, 1],
+      translate: [0, 0],
+    },
   };
 
   beforeEach(() => {
     container = document.createElement("div");
+    container.style.width = "800px";
+    container.style.height = "600px";
+    jest.spyOn(container, "getBoundingClientRect").mockImplementation(() => ({
+      width: 800,
+      height: 600,
+      top: 0,
+      left: 0,
+      right: 800,
+      bottom: 600,
+      x: 0,
+      y: 0,
+      toJSON: () => {},
+    }));
     document.body.appendChild(container);
   });
 
   afterEach(() => {
     document.body.removeChild(container);
     jest.clearAllMocks();
+  });
+
+  describe("Container and Initialization", () => {
+    it("calculates container size correctly", () => {
+      geoKorea = new GeoKorea(container, DEFAULT_OPTIONS);
+      expect(container.getBoundingClientRect).toHaveBeenCalled();
+    });
+
+    it("initializes SVG with container dimensions", () => {
+      geoKorea = new GeoKorea(container, DEFAULT_OPTIONS);
+      expect(geoKorea).toBeInstanceOf(GeoKorea);
+    });
   });
 
   describe("Instance Lifecycle", () => {
@@ -93,6 +135,18 @@ describe("GeoKorea", () => {
     });
   });
 
+  describe("Projection Management", () => {
+    beforeEach(() => {
+      geoKorea = new GeoKorea(container, DEFAULT_OPTIONS);
+    });
+
+    it("fits projection when setting TopoJSON data", () => {
+      expect(() => {
+        geoKorea.setTopoData(testTopoData, "testRegion");
+      }).not.toThrow();
+    });
+  });
+
   describe("Error Handling", () => {
     it("throws error on invalid TopoJSON data", () => {
       geoKorea = new GeoKorea(container, DEFAULT_OPTIONS);
@@ -101,6 +155,27 @@ describe("GeoKorea", () => {
       expect(() => {
         geoKorea.setTopoData(invalidData, "nonexistent");
       }).toThrow();
+    });
+
+    it("handles empty TopoJSON data gracefully", () => {
+      const emptyTopoData: Topology = {
+        type: "Topology",
+        objects: {
+          testRegion: {
+            type: "GeometryCollection",
+            geometries: [],
+          },
+        },
+        arcs: [],
+        transform: {
+          scale: [1, 1],
+          translate: [0, 0],
+        },
+      };
+
+      expect(() => {
+        geoKorea.setTopoData(emptyTopoData, "testRegion");
+      }).not.toThrow();
     });
   });
 });
