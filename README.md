@@ -22,7 +22,68 @@ yarn add geo-korea
 pnpm add geo-korea
 ```
 
-## Basic Usage
+## Usage
+
+### Basic Usage
+
+#### JavaScript
+
+The simplest way to create a map is to just provide a container ID:
+
+```javascript
+// Most basic usage - all options will be set to defaults
+const GeoKoreaRenderer = new GeoKoreaInitializer();
+const map = await GeoKoreaRenderer.createMap("map-container");
+```
+
+#### React
+
+Using React, you can create a map with a ref:
+
+```typescript
+import React, { useEffect, useRef } from "react";
+import { GeoKoreaInitializer } from "geo-korea";
+
+const App: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      // Most basic usage - all options will be set to defaults
+      const GeoKoreaRenderer = new GeoKoreaInitializer();
+      const map = GeoKoreaRenderer.createMap(containerRef.current);
+
+      return () => {
+        map.destroy();
+      };
+    }
+  }, []);
+
+  return <div ref={containerRef} />;
+};
+
+export default App;
+```
+
+### Adding Options
+
+You can enhance the map with various options:
+
+```javascript
+const GeoKoreaRenderer = new GeoKoreaInitializer();
+const map = await GeoKoreaRenderer.createMap("map-container", {
+  points: [
+    {
+      name: "Seoul City Hall",
+      region: "Capital Area",
+      location: "Seoul Metropolitan City",
+      coordinates: [37.5666805, 126.9784147],
+      type: "City Hall",
+    },
+  ],
+  onRegionClick: (name) => console.log(`Clicked region: ${name}`),
+});
+```
 
 ### React Component
 
@@ -35,27 +96,22 @@ const Map: React.FC = () => {
 
   useEffect(() => {
     if (mapContainerRef.current) {
-      const renderer = new GeoKoreaInitializer();
-
-      const geoKorea = renderer.createMap(mapContainerRef.current, {
-        width: 800,
-        height: 600,
+      const GeoKoreaRenderer = new GeoKoreaInitializer();
+      const map = GeoKoreaRenderer.createMap(mapContainerRef.current, {
         points: [
           {
-            type: "city",
-            name: "Seoul",
-            region: "서울",
-            location: "Capital City",
-            coordinates: [37.5665, 126.978],
-            radius: 5,
-            color: "#5EEAD4",
+            name: "Seoul City Hall",
+            region: "Capital Area",
+            location: "Seoul Metropolitan City",
+            coordinates: [37.5666805, 126.9784147],
+            type: "City Hall",
           },
         ],
         onRegionClick: (name) => console.log(`Clicked region: ${name}`),
       });
 
       return () => {
-        geoKorea.destroy();
+        map.destroy();
       };
     }
   }, []);
@@ -64,36 +120,38 @@ const Map: React.FC = () => {
 };
 ```
 
-### Vanilla JavaScript
+## Configuration
+
+### Auto-Calculated Values & Default Colors
+
+When you create a map without options, the library will:
+
+1. **Auto-Calculate**:
+
+   - `width` and `height`: Automatically set based on the container size
+   - `center` and `scale`: Automatically adjusted to fit the map perfectly within the container
+
+2. **Default Colors**:
 
 ```javascript
-const container = document.getElementById("map-container");
-const renderer = new GeoKoreaInitializer();
-
-const geoKorea = renderer.createMap(container, {
-  width: 800,
-  height: 600,
-  scale: 5,
-  colors: {
-    region: "#2A2D35",
-    regionHover: "#3F4046",
-    point: "#5EEAD4",
-    pointHover: "#6366F1",
-  },
-});
+const defaultColors = {
+  region: "#2A2D35",
+  regionHover: "#3F4046",
+  point: "#5EEAD4",
+  pointHover: "#6366F1",
+  selected: "#6366F1",
+  border: "#4A4B50",
+};
 ```
 
-## Configuration Options
+### Available Options
 
-### MapOptions Interface
+#### MapOptions Interface
 
 ```typescript
 type MapOptions = {
-  // Required
-  width: number; // Width of the map container
-  height: number; // Height of the map container
-
-  // Optional
+  width?: number; // Width of the map container
+  height?: number; // Height of the map container
   center?: [number, number]; // Center coordinates [longitude, latitude]
   scale?: number; // Map scale (0.5 to 8)
   points?: Point[]; // Array of point markers
@@ -103,7 +161,7 @@ type MapOptions = {
 };
 ```
 
-### Point Interface
+#### Point Interface
 
 ```typescript
 type Point = {
@@ -117,7 +175,7 @@ type Point = {
 };
 ```
 
-### ColorOptions Interface
+#### ColorOptions Interface
 
 ```typescript
 type ColorOptions = {
@@ -130,33 +188,12 @@ type ColorOptions = {
 };
 ```
 
-## Default Values
-
-```javascript
-const defaults = {
-  width: 800,
-  height: 600,
-  center: [128.35, 37.68],
-  scale: 5,
-  colors: {
-    region: "#2A2D35",
-    regionHover: "#3F4046",
-    point: "#5EEAD4",
-    pointHover: "#6366F1",
-    selected: "#6366F1",
-    border: "#4A4B50",
-  },
-};
-```
-
 ## Advanced Features
 
 ### Custom TopoJSON Data
 
-You can provide your own TopoJSON data file:
-
 ```typescript
-const geoKorea = renderer.createMap(container, {
+const map = await GeoKoreaRenderer.createMap("map-container", {
   topoJsonPath: "/path/to/custom-map-data.json",
 });
 ```
@@ -164,7 +201,7 @@ const geoKorea = renderer.createMap(container, {
 ### Custom Tooltip Renderer
 
 ```typescript
-const geoKorea = renderer.createMap(container, {
+const map = await GeoKoreaRenderer.createMap("map-container", {
   tooltipRenderer: (point) => {
     return `
       <div>
@@ -174,6 +211,18 @@ const geoKorea = renderer.createMap(container, {
     `;
   },
 });
+// or
+// using React components
+const map = GeoKoreaRenderer.createMap(mapContainerRef.current, {
+  tooltipRenderer: (point) => {
+    return `
+      <div>
+        <strong>${point.name}</strong>
+        <p>${point.location}</p>
+      </div>
+    `;
+  },
+}
 ```
 
 ### Instance Methods
