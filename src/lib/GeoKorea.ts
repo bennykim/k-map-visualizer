@@ -3,7 +3,7 @@ import type { GeoPath, GeoProjection } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 
-import { COLORS, CONFIG, DEFAULT_OPTIONS, DEFAULT_RADIUS } from "./constants";
+import { COLORS, CONFIG, DEFAULT_RADIUS } from "./constants";
 import type { GeoFeature, MapOptions, Point } from "./types";
 
 type TooltipContent = string | HTMLElement;
@@ -18,7 +18,8 @@ export class GeoKorea {
   private readonly projection: GeoProjection;
   private readonly path: GeoPath;
   private readonly zoom: d3.ZoomBehavior<SVGSVGElement, unknown>;
-  private readonly elements = new Map<string, D3Selection<SVGElement>>();
+
+  private selectedRegionName: string | null = null;
 
   constructor(
     container: HTMLElement,
@@ -231,52 +232,60 @@ export class GeoKorea {
   }
 
   private handleRegion: {
-    click: (
-      event: MouseEvent & { currentTarget: SVGPathElement },
-      d: GeoFeature
-    ) => void;
-    enter: (
-      event: MouseEvent & { currentTarget: SVGPathElement },
-      d: GeoFeature
-    ) => void;
-    leave: (event: MouseEvent & { currentTarget: SVGPathElement }) => void;
+    click: (event: MouseEvent, d: GeoFeature) => void;
+    enter: (event: MouseEvent) => void;
+    leave: (event: MouseEvent) => void;
   } = {
     click: (event: MouseEvent, d: GeoFeature) => {
-      const colors = this.getColors();
       event.stopPropagation();
-      this.options.onRegionClick?.(d.properties.name);
+      const colors = this.getColors();
+      const regionName = d.properties.name;
 
-      const paths = this.g.selectAll<SVGPathElement, GeoFeature>("path");
-      paths.style("fill", colors.region);
+      this.g
+        .select(".regions-group")
+        .selectAll<SVGPathElement, GeoFeature>("path.region")
+        .attr("fill", colors.region);
 
-      d3.select(event.currentTarget as SVGPathElement).style(
+      if (this.selectedRegionName === regionName) {
+        this.selectedRegionName = null;
+        this.options.onRegionClick?.("");
+        this.reset();
+        return;
+      }
+
+      this.selectedRegionName = regionName;
+      d3.select(event.currentTarget as SVGPathElement).attr(
         "fill",
         colors.selected
       );
 
+      this.options.onRegionClick?.(regionName);
       this.zoomToRegion(d);
     },
 
-    enter: (event: MouseEvent, d: GeoFeature) => {
+    enter: (event: MouseEvent) => {
       const colors = this.getColors();
-      const target = d3.select(event.currentTarget as Element);
+      const target = d3.select(event.currentTarget as SVGPathElement);
+      const d = target.datum() as GeoFeature;
 
-      if (target.style("fill") !== colors.selected) {
-        target.style("fill", colors.regionHover);
+      if (d.properties.name !== this.selectedRegionName) {
+        target.attr("fill", colors.regionHover);
       }
+
       // Uncomment this line to show region names on hover
       // this.showLabel(d);
     },
 
     leave: (event: MouseEvent) => {
       const colors = this.getColors();
-      const target = d3.select(event.currentTarget as Element);
+      const target = d3.select(event.currentTarget as SVGPathElement);
+      const d = target.datum() as GeoFeature;
 
-      if (target.style("fill") !== colors.selected) {
-        target.style("fill", colors.region);
+      if (d.properties.name !== this.selectedRegionName) {
+        target.attr("fill", colors.region);
       }
 
-      this.hideLabel();
+      // this.hideLabel();
     },
   };
 
@@ -338,13 +347,19 @@ export class GeoKorea {
   public destroy(): void {
     this.tooltipDiv.remove();
     this.svg.remove();
-    this.elements.clear();
   }
 
   private reset(): void {
-    this.g.selectAll<SVGPathElement, GeoFeature>("path").style("fill", null);
-    this.hideLabel();
+    const colors = this.getColors();
+
+    this.g
+      .select(".regions-group")
+      .selectAll<SVGPathElement, GeoFeature>("path.region")
+      .attr("fill", colors.region);
+
+    this.selectedRegionName = null;
     this.options.onRegionClick?.("");
+    // this.hideLabel();
 
     this.svg
       .transition()
@@ -364,16 +379,18 @@ export class GeoKorea {
   }
 
   private renderRegions(features: GeoFeature[]): void {
-    const colors = this.options.colors ?? DEFAULT_OPTIONS.colors;
+    const colors = this.getColors();
 
     this.g
       .append("g")
-      .attr("fill", colors?.region ?? COLORS.DEFAULT_REGION)
-      .attr("cursor", "pointer")
+      .attr("class", "regions-group")
       .selectAll<SVGPathElement, GeoFeature>("path")
       .data(features)
       .join("path")
+      .attr("class", "region")
       .attr("d", this.path)
+      .attr("fill", colors.region)
+      .attr("cursor", "pointer")
       .on("click", this.handleRegion.click)
       .on("mouseenter", this.handleRegion.enter)
       .on("mouseleave", this.handleRegion.leave);
@@ -384,6 +401,7 @@ export class GeoKorea {
 
     this.g
       .append("path")
+      .attr("class", "region-borders")
       .attr("fill", "none")
       .attr("stroke", colors.border)
       .attr("stroke-linejoin", "round")
@@ -401,13 +419,12 @@ export class GeoKorea {
 
   private zoomToRegion(d: GeoFeature): void {
     const [[x0, y0], [x1, y1]] = this.path.bounds(d);
+    const containerWidth = this.svg.node()?.clientWidth ?? 0;
+    const containerHeight = this.svg.node()?.clientHeight ?? 0;
+
     const scale = Math.min(
       CONFIG.ZOOM.MAX_REGION_SCALE,
-      0.5 /
-        Math.max(
-          (x1 - x0) / this.options.width,
-          (y1 - y0) / this.options.height
-        )
+      0.5 / Math.max((x1 - x0) / containerWidth, (y1 - y0) / containerHeight)
     );
 
     this.svg
@@ -416,7 +433,7 @@ export class GeoKorea {
       .call(
         this.zoom.transform,
         d3.zoomIdentity
-          .translate(this.options.width / 2, this.options.height / 2)
+          .translate(containerWidth / 2, containerHeight / 2)
           .scale(scale)
           .translate(-(x0 + x1) / 2, -(y0 + y1) / 2)
       );
