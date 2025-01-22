@@ -3,21 +3,73 @@
 
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/gk.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>K Map Visualizer</title>
-  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="main.css">
 </head>
 
 <body>
-  <h1 class="region-name" id="region-name">지역을 선택하세요</h1>
-  <div id="map-container"></div>
+  <div class="app">
+    <img src="/assets/night_sky.webp" alt="image of the night sky" class="night-sky" />
+    <div class="left-panel">
+      <a href="https://geo-korea.netlify.app" class="title" target="_blank" rel="noopener noreferrer">
+        Geo Korea
+      </a>
+      <a href="https://github.com/bennykim/geo-korea" class="github-link" target="_blank" rel="noopener noreferrer">
+        v1.0.6 • Github
+      </a>
+      <div id="map-container"></div>
+    </div>
+    <div class="right-panel">
+      <div class="panel-content">
+
+        <div class="color-controls">
+          <ul class="color-list">
+            <li class="color-item">
+              <span class="color-label">Selected Region</span>
+              <h2 id="region-name">No Region</h2>
+            </li>
+            <li class="color-item">
+              <span class="color-label">region</span>
+              <input type="text" id="region-color" value="rgba(15, 23, 42, 0.8)" placeholder="HEX or RGBA">
+            </li>
+            <li class="color-item">
+              <span class="color-label">region Hover</span>
+              <input type="text" id="region-hover-color" value="rgba(30, 41, 59, 0.9)" placeholder="HEX or RGBA">
+            </li>
+            <li class="color-item">
+              <span class="color-label">point</span>
+              <input type="text" id="point-color" value="rgba(34, 211, 238, 1)" placeholder="HEX or RGBA">
+            </li>
+            <li class="color-item">
+              <span class="color-label">point Hover</span>
+              <input type="text" id="point-hover-color" value="rgba(6, 182, 212, 1)" placeholder="HEX or RGBA">
+            </li>
+            <li class="color-item">
+              <span class="color-label">selected</span>
+              <input type="text" id="selected-color" value="rgba(49, 46, 129, 1)" placeholder="HEX or RGBA">
+            </li>
+            <li class="color-item">
+              <span class="color-label">border</span>
+              <input type="text" id="border-color" value="rgba(148, 163, 184, 0.2)" placeholder="HEX or RGBA">
+            </li>
+          </ul>
+          <div class="validation-messages"></div>
+          <button id="apply-colors" class="apply-button">
+            <span class="button-text">Apply Changes</span>
+            <span class="button-icon">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/topojson-client@3"></script>
-
   <script src="bundle.js"></script>
-  <script src="scripts/cityHalls.js"></script>
-  <script src="scripts/main.js"></script>
+  <script src="cityHalls.js"></script>
+  <script src="main.js"></script>
 </body>
 
 </html>

@@ -3,6 +3,7 @@ node_modules/
 
 # Build output
 dist/
+dist-app/
 public/bundle.js
 public/bundle.js.map
 
