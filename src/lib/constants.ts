@@ -1,5 +1,10 @@
 import type { MapOptions } from "./types";
 
+export const LANGUAGE = {
+  EN: "en",
+  KR: "kr",
+} as const;
+
 export const DEFAULT_OPTIONS: MapOptions = {
   width: 800,
   height: 600,
@@ -14,6 +19,7 @@ export const DEFAULT_OPTIONS: MapOptions = {
     selected: "#6366F1",
     border: "#4A4B50",
   },
+  language: LANGUAGE.EN,
 };
 
 export const CONFIG = {

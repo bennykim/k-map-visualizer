@@ -3,7 +3,7 @@ import type { GeoPath, GeoProjection } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 
-import { COLORS, CONFIG, DEFAULT_RADIUS } from "./constants";
+import { COLORS, CONFIG, DEFAULT_RADIUS, LANGUAGE } from "./constants";
 import type { GeoFeature, MapOptions, Point } from "./types";
 
 type TooltipContent = string | HTMLElement;
@@ -239,7 +239,10 @@ export class GeoKorea {
     click: (event: MouseEvent, d: GeoFeature) => {
       event.stopPropagation();
       const colors = this.getColors();
-      const regionName = d.properties.name;
+
+      const { name, name_eng } = d.properties;
+      const regionName =
+        this.options.language === LANGUAGE.KR ? name : name_eng;
 
       this.g
         .select(".regions-group")
