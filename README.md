@@ -2,6 +2,8 @@
 
 Interactive map visualization library for Korea using TopoJSON data, built with D3.js. This library provides a flexible and customizable way to create interactive maps of South Korea with features like region highlighting, custom markers, and smooth animations.
 
+### 🚀 [Live Demo](https://geo-korea.netlify.app)
+
 ## Features
 
 - 🗺️ Interactive region visualization with hover and click effects
