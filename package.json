@@ -29,7 +29,7 @@
     "clean:app": "rimraf dist-app",
     "dev": "rollup -c -w",
     "build": "pnpm run clean && rollup -c",
-    "build:app": "pnpm run clean:app && rollup -c --app",
+    "build:app": "pnpm run clean:app && BUILD_TARGET=app rollup -c --bundleConfigAsCjs",
     "serve": "pnpm build:app && serve -l 3007 dist-app",
     "test": "jest --verbose",
     "test:watch": "jest --watch",

@@ -78,9 +78,6 @@ const appConfig = [
   },
 ];
 
-export default (commandLineArgs) => {
-  if (commandLineArgs.app) {
-    return appConfig;
-  }
-  return libraryConfigs;
+export default () => {
+  return process.env.BUILD_TARGET === "app" ? appConfig : libraryConfigs;
 };

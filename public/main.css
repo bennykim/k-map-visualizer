@@ -61,6 +61,7 @@ body {
 .left-panel {
   position: relative;
   flex: 1;
+  min-width: 440px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   overflow: hidden;
@@ -69,6 +70,7 @@ body {
 }
 
 .right-panel {
+  min-width: 440px;
   width: 440px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
